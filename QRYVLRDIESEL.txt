@@ -1,0 +1,399 @@
+SELECT
+
+    notafiscalsimples.dtemissao As data
+    ,motorista.razaosocial As Motorista
+    ,veiculo.placa As Placaveic
+    ,veiculo.capacidadetanque As capacidade
+   ,((veiculo.capacidadetanque-(veiculo.capacidadetanque*0.15))*1.5)::NUMERIC(15,2) As Autonomia
+    ,marcaveiculo_modelo.descricao As MarcaModelo
+    ,caracteristicaveiculo.descricao As Tipoengate
+    ,notafiscalsimples.numero AS NFS
+    ,cadastro_vinculo.vinculo
+    ,COALESCE(INITCAP(cad_for.razaosocial),'') AS fornecedor
+    ,COALESCE(INITCAP(cad_for.cidade),'') AS cidade_fornecedor
+    ,COALESCE(cad_for.uf,'') AS uf_fornecedor
+    ,notafiscalsimples.marcadoranterior AS Km_inicial
+    ,notafiscalsimples.marcador AS Km_final
+    ,notafiscalsimples.diferencamarcador AS Distancia
+    ,notafiscalsimples_item.quantidade As Qtde
+    ,notafiscalsimples.mediaconsumo As Media_realiz
+    ,(CASE
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = 'G420'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN -- realiza o calculo da média baseado em local, variacao
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.84')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = 'R440'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.88')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = 'R500'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.98')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = 'XF105'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.92')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = '510A'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.90')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = '530'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.92')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '4646'
+          OR notafiscalsimples_item.produto = '149'
+          OR notafiscalsimples_item.produto = 'D172A')
+        THEN veiculo.consumomdioarla
+        ELSE
+          ((regiao.descricaoabreviada)::NUMERIC(15,2)*'1.25')::NUMERIC(15,2)
+        END) As Media
+    ,(notafiscalsimples.mediaconsumo 
+        /
+    NULLIF((CASE
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = 'G420'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN -- realiza o calculo da média baseado em local, variacao
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.84')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = 'R440'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.88')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = 'R500'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.98')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = 'XF105'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.92')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = '510A'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.90')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = '530'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.92')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '4646'
+          OR notafiscalsimples_item.produto = '149'
+          OR notafiscalsimples_item.produto = 'D172A')
+        THEN veiculo.consumomdioarla
+        ELSE
+          ((regiao.descricaoabreviada)::NUMERIC(15,2)*'1.25')::NUMERIC(15,2)
+        END),0)) As variacao
+    ,COALESCE(initcap(produto.descricao),'')::VARCHAR AS produto 
+    ,MIN(notafiscalsimples_item.valorunitariomoedautilizada)::numeric(15,2) As valor_min
+    ,(CASE
+        WHEN (notafiscalsimples.mediaconsumo 
+        /
+    NULLIF((CASE
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = 'G420'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN -- realiza o calculo da média baseado em local, variacao
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.84')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = 'R440'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.88')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = 'R500'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.98')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = 'XF105'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.92')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = '510A'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.90')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = '530'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.92')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '4646'
+          OR notafiscalsimples_item.produto = '149'
+          OR notafiscalsimples_item.produto = 'D172A')
+        THEN veiculo.consumomdioarla
+        ELSE
+          ((regiao.descricaoabreviada)::NUMERIC(15,2)*'1.25')::NUMERIC(15,2)
+        END),0)) < 1
+    THEN
+    ((notafiscalsimples.diferencamarcador /
+    NULLIF((CASE
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = 'G420'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN -- realiza o calculo da média baseado em local, variacao
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.84')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = 'R440'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.88')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = 'R500'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.98')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = 'XF105'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.92')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = '510A'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.90')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = '530'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.92')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '4646'
+          OR notafiscalsimples_item.produto = '149'
+          OR notafiscalsimples_item.produto = 'D172A')
+        THEN veiculo.consumomdioarla
+        ELSE
+          ((regiao.descricaoabreviada)::NUMERIC(15,2)*'1.25')::NUMERIC(15,2)
+        END),0)-notafiscalsimples_item.quantidade)
+        *
+        MIN(notafiscalsimples_item.valorunitariomoedautilizada))::numeric(15,2)
+    ELSE
+        ((notafiscalsimples.diferencamarcador /
+    NULLIF((CASE
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = 'G420'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN -- realiza o calculo da média baseado em local, variacao
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.84')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = 'R440'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.88')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = 'R500'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.98')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = 'XF105'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.92')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = '510A'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.90')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '1'
+          OR notafiscalsimples_item.produto = '840')
+          AND veiculo.modeloveiculo = '530'
+          AND veiculo.rebocador IS NOT NULL
+          AND rebocador.tipoveiculo <> 'C3'
+        THEN 
+            ((regiao.descricaoabreviada)::NUMERIC(15,2)*'0.92')::NUMERIC(15,2)
+        WHEN (notafiscalsimples_item.produto = '4646'
+          OR notafiscalsimples_item.produto = '149'
+          OR notafiscalsimples_item.produto = 'D172A')
+        THEN veiculo.consumomdioarla
+        ELSE
+          ((regiao.descricaoabreviada)::NUMERIC(15,2)*'1.25')::NUMERIC(15,2)
+        END),0)-notafiscalsimples_item.quantidade)
+        *
+        MIN(notafiscalsimples_item.valorunitariomoedautilizada)::numeric(15,2))::NUMERIC(15,2)
+    END) as perdaganho
+    ,notafiscalsimples_item.valortotal As ValorTotal
+    ,proprietario.razaosocial AS operacao
+
+FROM notafiscalsimples
+          
+JOIN notafiscalsimples_item USING(grupo
+                                 ,empresa
+                                 ,filial
+                                 ,diferenciadorsequencia
+                                 ,sequencia)
+    
+JOIN grupo 
+    ON grupo.codigo = notafiscalsimples.grupo
+          
+JOIN empresa 
+    ON empresa.grupo = notafiscalsimples.grupo
+    AND empresa.codigo = notafiscalsimples.empresa
+            
+LEFT JOIN veiculo 
+    ON veiculo.placa = notafiscalsimples.veiculo
+
+LEFT JOIN marcaveiculo_modelo
+    ON marcaveiculo_modelo.marcaveiculo = veiculo.marcaveiculo
+    AND marcaveiculo_modelo.codigo = veiculo.modeloveiculo
+
+LEFT JOIN veiculo rebocador
+    ON veiculo.rebocador = rebocador.placa
+
+LEFT JOIN cadastro proprietario
+    ON proprietario.codigo = veiculo.permissionaria
+
+LEFT JOIN caracteristicaveiculo 
+    ON caracteristicaveiculo.codigo = rebocador.caracteristicaveiculo
+
+LEFT JOIN cadastro responsavel 
+    ON responsavel.codigo = veiculo.funcionarioresponsavel  
+
+LEFT JOIN cadastro motorista
+    ON motorista.codigo = notafiscalsimples.motorista
+          
+LEFT JOIN centrocusto
+    ON centrocusto.grupo   = veiculo.grupo
+    AND centrocusto.codigo = veiculo.centrocusto
+          
+JOIN filial 
+    ON filial.grupo   = notafiscalsimples.grupo
+    AND filial.empresa = notafiscalsimples.empresa
+    AND filial.codigo  = notafiscalsimples.filial
+          
+JOIN unidade
+    ON unidade.grupo   = notafiscalsimples.grupo
+    AND unidade.empresa = notafiscalsimples.empresa
+    AND unidade.filial  = notafiscalsimples.filial
+    AND unidade.codigo  = notafiscalsimples.unidade
+          
+JOIN cadastro cad_for 
+    ON cad_for.codigo = notafiscalsimples.fornecedor
+    
+JOIN cadastro_vinculo
+    ON cadastro_vinculo.cnpjcpfcodigo = cad_for.codigo
+    
+LEFT JOIN cidade_regiao
+    ON cidade_regiao.cidade = cad_for.cidade
+    AND cidade_regiao.uf = cad_for.uf
+    
+LEFT JOIN regiao
+    ON regiao.codigo = cidade_regiao.regiao
+          
+JOIN produto 
+    ON PRODUTO.GRUPO   = notafiscalsimples.grupo
+    AND produto.empresa = notafiscalsimples.empresa
+    AND produto.codigo  = notafiscalsimples_item.produto
+          
+WHERE 
+    notafiscalsimples.tipodocumento = '30'
+AND veiculo.modeloveiculo <> 'NA'
+AND veiculo.tipofrota <> '2'
+AND veiculo.utilizacaoveiculo <> '2'
+AND cadastro_vinculo.vinculo = '2'
+AND notafiscalsimples_item.grupoproduto = 'ABT'
+and notafiscalsimples.dtemissao::date BETWEEN '{?PARAM Inicio}' AND '{?PARAM Final}'
+
+GROUP BY
+    veiculo.placa,
+    veiculo.capacidadetanque,
+    motorista.razaosocial,
+    notafiscalsimples.numero,
+    marcaveiculo_modelo.descricao,
+    caracteristicaveiculo.descricao,
+    notafiscalsimples.dtemissao,
+    cadastro_vinculo.vinculo,
+    cad_for.razaosocial,
+    cad_for.codigo,
+    cad_for.cidade,
+    cad_for.uf,
+    produto.descricao,
+    notafiscalsimples_item.produto,
+    notafiscalsimples_item.quantidade,
+    notafiscalsimples.marcadoranterior,
+    notafiscalsimples.marcador,
+    notafiscalsimples.diferencamarcador,
+    notafiscalsimples_item.quantidade,
+    notafiscalsimples.mediaconsumo,
+    rebocador.caracteristicaveiculo,
+    regiao.descricaoabreviada,
+    notafiscalsimples_item.valortotal,
+    proprietario.razaosocial,
+    rebocador.tipoveiculo
+    
+ORDER BY
+    notafiscalsimples.dtemissao
+    
+    
+    
